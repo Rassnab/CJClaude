@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scandic — Strategic Customer Journey Framework</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <style>
+    /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
+    :root {
+      --font: 'Inter', system-ui, sans-serif;
+      --bg-page: #F5F4F2;
+      --bg-surface: #FFFFFF;
+      --brand-primary: #8B1A4A;
+      --brand-accent: #C9326A;
+      --brand-dark: #1A1A2E;
+      --text-primary: #1A1A1A;
+      --text-secondary: #5A5A6A;
+      --text-muted: #9A9AA8;
+      --border: #E4E0E8;
+      --hero-gold: #C9860A;
+      --hero-gold-light: rgba(201,134,10,0.12);
+      --hero-gold-outline: rgba(201,134,10,0.4);
+      --gap-warning: #E05A2B;
+      --gap-warning-light: rgba(224,90,43,0.08);
+      --success: #2A7A4B;
+      --success-light: rgba(42,122,75,0.07);
+      --radius-card: 12px;
+      --radius-tag: 6px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --op-health-light: rgba(59,130,246,0.06);
+    }
+
+    /* ─── RESET & BASE ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── CONTAINER ─────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .container--narrow { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    /* ─── NAV ───────────────────────────────────────────────────── */
+    #topnav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .nav-wordmark {
+      font-weight: 700; font-size: 18px; color: var(--brand-primary);
+      text-decoration: none; letter-spacing: -0.3px;
+    }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--text-secondary); font-size: 14px;
+      font-weight: 500; padding: 4px 0;
+      border-bottom: 2px solid transparent; transition: all 0.2s;
+    }
+    .nav-links a:hover { color: var(--brand-primary); }
+    .nav-links a.active {
+      color: var(--brand-accent); border-bottom-color: var(--brand-accent);
+    }
+
+    /* ─── HERO HEADER ───────────────────────────────────────────── */
+    #hero { padding: 64px 0 48px; }
+    .hero-title {
+      font-size: 32px; font-weight: 700; color: var(--brand-dark);
+      letter-spacing: -0.5px; margin-bottom: 8px;
+    }
+    .hero-subtitle {
+      font-size: 15px; color: var(--text-muted); margin-bottom: 32px;
+      font-weight: 500;
+    }
+    .hero-quote {
+      border-left: 4px solid var(--brand-primary);
+      padding: 20px 24px; margin-bottom: 40px;
+      background: var(--bg-surface); border-radius: 0 var(--radius-card) var(--radius-card) 0;
+      font-size: 17px; line-height: 1.7; color: var(--text-primary);
+      box-shadow: var(--shadow);
+    }
+    .hm-badges { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hm-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 999px; padding: 8px 18px 8px 14px;
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow);
+      text-decoration: none;
+    }
+    .hm-badge:hover {
+      border-color: var(--hero-gold); background: var(--hero-gold-light);
+    }
+    .hm-badge-icon { font-size: 18px; }
+    .hm-badge-num { color: var(--hero-gold); font-weight: 700; }
+
+    /* ─── SECTION HEADERS ───────────────────────────────────────── */
+    .section-header { margin-bottom: 32px; }
+    .section-title {
+      font-size: 24px; font-weight: 700; color: var(--brand-dark);
+      letter-spacing: -0.3px; margin-bottom: 8px;
+    }
+    .section-intro {
+      font-size: 15px; color: var(--text-secondary); max-width: 720px;
+      line-height: 1.65;
+    }
+    section { padding: 48px 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    /* ─── TIMELINE RAIL ─────────────────────────────────────────── */
+    .timeline-wrapper {
+      overflow-x: auto; padding-bottom: 16px; margin-bottom: 24px;
+    }
+    .timeline-rail {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      min-width: 800px; position: relative; padding: 0 24px;
+    }
+    .timeline-stage { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 1; }
+    .timeline-circle {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--brand-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px; flex-shrink: 0;
+      position: relative; z-index: 2;
+    }
+    .timeline-label {
+      margin-top: 10px; font-size: 13px; font-weight: 600;
+      color: var(--text-primary); text-align: center; max-width: 120px;
+    }
+    .timeline-customer {
+      font-size: 12px; color: var(--text-muted); font-style: italic;
+      text-align: center; max-width: 130px; margin-top: 4px;
+    }
+    .timeline-connector {
+      position: absolute; top: 22px; left: 0; right: 0;
+      height: 2px; background: var(--border); z-index: 0;
+    }
+    /* arrows between circles */
+    .timeline-stage:not(:last-child)::after {
+      content: ''; position: absolute; top: 20px;
+      right: -6px; width: 0; height: 0;
+      border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+      border-left: 6px solid var(--brand-primary); z-index: 3;
+      transform: translateX(50%);
+    }
+
+    /* ─── HM MAPPING BAR ────────────────────────────────────────── */
+    .hm-mapping-bar {
+      min-width: 800px; position: relative;
+      height: 40px; margin: 0 24px 32px;
+    }
+    .hm-bar-row {
+      position: absolute; height: 8px; border-radius: 4px;
+      display: flex; align-items: center;
+    }
+    .hm-bar-label {
+      position: absolute; top: -18px; font-size: 11px;
+      font-weight: 600; color: var(--hero-gold); white-space: nowrap;
+    }
+    .hm-bar-primary { background: var(--hero-gold); }
+    .hm-bar-adjacent { background: var(--hero-gold-outline); }
+
+    /* ─── STAGE CARDS ───────────────────────────────────────────── */
+    .stage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .stage-card {
+      background: var(--bg-surface); border-radius: var(--radius-card);
+      box-shadow: var(--shadow); padding: 24px; position: relative;
+      transition: box-shadow 0.2s;
+    }
+    .stage-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .stage-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .stage-num {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--brand-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; flex-shrink: 0;
+    }
+    .stage-card-label { font-weight: 600; font-size: 16px; }
+    .stage-card-customer { font-size: 14px; color: var(--text-muted); font-style: italic; }
+    .stage-complete {
+      background: #f7f7f9; border-radius: var(--radius-tag);
+      padding: 10px 14px; font-size: 13px; color: var(--text-secondary);
+      margin-bottom: 14px; line-height: 1.5;
+    }
+    .stage-success {
+      color: var(--success); font-weight: 600; font-size: 14px;
+      margin-bottom: 14px; display: flex; align-items: flex-start; gap: 6px;
+    }
+    .stage-success-icon { flex-shrink: 0; margin-top: 2px; }
+    .stage-outcomes { list-style: none; margin-bottom: 14px; }
+    .stage-outcomes li {
+      padding: 4px 0 4px 16px; position: relative;
+      font-size: 14px; color: var(--text-primary); line-height: 1.55;
+    }
+    .stage-outcomes li::before {
+      content: '•'; position: absolute; left: 0; color: var(--brand-accent);
+      font-weight: 700;
+    }
+    .stage-evidence {
+      font-size: 13px; color: var(--text-muted); font-style: italic;
+      line-height: 1.55; border-top: 1px solid var(--border);
+      padding-top: 12px; margin-top: 4px;
+    }
+    .stage-hm-badges {
+      position: absolute; top: 16px; right: 16px;
+      display: flex; gap: 6px;
+    }
+    .stage-hm-tag {
+      font-size: 11px; font-weight: 600; padding: 3px 8px;
+      border-radius: var(--radius-tag); display: inline-flex;
+      align-items: center; gap: 3px;
+    }
+    .stage-hm-tag--primary {
+      background: var(--hero-gold); color: #fff;
+    }
+    .stage-hm-tag--adjacent {
+      background: transparent; color: var(--hero-gold);
+      border: 1px solid var(--hero-gold-outline);
+    }
+
+    /* ─── HERO MOMENT CARDS ─────────────────────────────────────── */
+    .hm-stack { display: flex; flex-direction: column; gap: 32px; }
+    .hm-card {
+      background: var(--bg-surface); border-radius: var(--radius-card);
+      box-shadow: var(--shadow); overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+    .hm-card.highlight {
+      box-shadow: 0 0 0 3px var(--hero-gold), 0 4px 24px rgba(201,134,10,0.2);
+    }
+    @keyframes hm-flash {
+      0% { box-shadow: 0 0 0 3px var(--hero-gold), 0 4px 24px rgba(201,134,10,0.25); }
+      50% { box-shadow: 0 0 0 6px var(--hero-gold), 0 4px 32px rgba(201,134,10,0.35); }
+      100% { box-shadow: var(--shadow); }
+    }
+    .hm-card.flash { animation: hm-flash 1.2s ease-out; }
+    .hm-card-header {
+      background: var(--brand-primary); color: #fff;
+      padding: 20px 24px; display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .hm-card-header-left { display: flex; align-items: center; gap: 12px; }
+    .hm-card-icon { font-size: 28px; }
+    .hm-card-title { font-size: 20px; font-weight: 700; }
+    .hm-card-header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .hm-stage-pill {
+      font-size: 12px; font-weight: 600; padding: 4px 10px;
+      border-radius: 999px; background: rgba(255,255,255,0.2); color: #fff;
+    }
+    .hm-stage-pill--primary { background: rgba(255,255,255,0.3); }
+    .hm-feasibility {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--hero-gold); color: #fff; font-size: 12px;
+      font-weight: 600; padding: 4px 10px; border-radius: 999px;
+      margin: 0 24px 0;
+    }
+    .hm-feasibility-row { padding: 8px 24px 0; }
+    .hm-promise {
+      border-left: 4px solid var(--hero-gold); padding: 16px 20px;
+      margin: 20px 24px; font-style: italic; font-size: 16px;
+      color: var(--text-primary); line-height: 1.65;
+      background: var(--hero-gold-light); border-radius: 0 var(--radius-tag) var(--radius-tag) 0;
+    }
+    .hm-body { padding: 0 24px 24px; }
+    .hm-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .hm-col-title {
+      font-size: 14px; font-weight: 700; color: var(--brand-dark);
+      margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .hm-sub-title {
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      margin: 12px 0 6px;
+    }
+    .hm-sub-title:first-child { margin-top: 0; }
+    .hm-list { list-style: none; }
+    .hm-list li {
+      padding: 4px 0 4px 16px; position: relative;
+      font-size: 14px; line-height: 1.55; color: var(--text-primary);
+    }
+    .hm-list li::before {
+      content: '•'; position: absolute; left: 0; color: var(--brand-accent);
+      font-weight: 700;
+    }
+    .hm-numbered { list-style: none; counter-reset: hm-num; }
+    .hm-numbered li {
+      padding: 4px 0 4px 24px; position: relative;
+      font-size: 14px; line-height: 1.55; color: var(--text-primary);
+      counter-increment: hm-num;
+    }
+    .hm-numbered li::before {
+      content: counter(hm-num) '.'; position: absolute; left: 0;
+      font-weight: 700; color: var(--brand-primary);
+    }
+    .hm-risk-list { list-style: none; }
+    .hm-risk-list li {
+      padding: 4px 0 4px 24px; position: relative;
+      font-size: 14px; line-height: 1.55; color: var(--text-primary);
+    }
+    .hm-risk-list li::before {
+      content: '⚠'; position: absolute; left: 0; font-size: 13px;
+    }
+    .hm-evidence {
+      margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;
+    }
+    .hm-evidence summary {
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; padding: 4px 0;
+    }
+    .hm-evidence summary:hover { color: var(--text-secondary); }
+    .hm-evidence-list {
+      list-style: none; margin-top: 8px;
+    }
+    .hm-evidence-list li {
+      padding: 3px 0 3px 16px; position: relative;
+      font-size: 13px; color: var(--text-muted); line-height: 1.5;
+    }
+    .hm-evidence-list li::before {
+      content: '–'; position: absolute; left: 0; color: var(--text-muted);
+    }
+    .hm-criteria {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
+    }
+    .hm-criteria-chip {
+      font-size: 12px; font-weight: 600; padding: 5px 10px;
+      border-radius: var(--radius-tag); background: var(--success-light);
+      color: var(--success); display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    /* ─── SCORECARD ─────────────────────────────────────────────── */
+    .accordion-stack { display: flex; flex-direction: column; gap: 16px; }
+    .accordion-panel {
+      background: var(--bg-surface); border-radius: var(--radius-card);
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .accordion-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; cursor: pointer; user-select: none;
+      transition: background 0.15s;
+    }
+    .accordion-header:hover { background: #fafafa; }
+    .accordion-header-left { display: flex; align-items: center; gap: 12px; }
+    .accordion-header-icon { font-size: 22px; }
+    .accordion-header-title { font-weight: 600; font-size: 16px; }
+    .accordion-header-stage {
+      font-size: 12px; color: var(--text-muted); font-weight: 500;
+      margin-left: 4px;
+    }
+    .accordion-header-right { display: flex; align-items: center; gap: 10px; }
+    .accordion-metric-count {
+      font-size: 12px; font-weight: 600; padding: 3px 10px;
+      border-radius: 999px; background: #f0f0f4; color: var(--text-secondary);
+    }
+    .accordion-gap-badge {
+      font-size: 12px; font-weight: 600; padding: 3px 10px;
+      border-radius: 999px; background: var(--gap-warning-light);
+      color: var(--gap-warning); display: inline-flex; align-items: center; gap: 4px;
+    }
+    .accordion-chevron {
+      width: 20px; height: 20px; transition: transform 0.25s;
+      color: var(--text-muted);
+    }
+    .accordion-panel.expanded .accordion-chevron { transform: rotate(180deg); }
+    .accordion-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .accordion-panel.expanded .accordion-body { max-height: 1200px; }
+    .accordion-body-inner { padding: 0 24px 24px; }
+    .metrics-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .metrics-table th {
+      text-align: left; font-size: 12px; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 10px 12px; border-bottom: 2px solid var(--border);
+    }
+    .metrics-table td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+      vertical-align: top; line-height: 1.5;
+    }
+    .metrics-table tr.row-lagging { background: var(--success-light); }
+    .metrics-table tr.row-leading-odd { background: #fff; }
+    .metrics-table tr.row-leading-even { background: #fafafa; }
+    .metrics-table tr.row-operational { background: var(--op-health-light); }
+    .metrics-table .type-cell { font-weight: 600; font-size: 13px; white-space: nowrap; }
+    .measurement-gaps-box {
+      border-left: 4px solid var(--gap-warning);
+      background: var(--gap-warning-light); padding: 14px 18px;
+      border-radius: 0 var(--radius-tag) var(--radius-tag) 0;
+      margin-top: 18px; font-size: 14px; color: var(--text-primary); line-height: 1.55;
+    }
+    .measurement-gaps-box strong {
+      display: block; font-size: 13px; color: var(--gap-warning);
+      margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* ─── GAPS ──────────────────────────────────────────────────── */
+    .gaps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .gap-card {
+      background: var(--bg-surface); border-radius: var(--radius-card);
+      box-shadow: var(--shadow); padding: 24px; position: relative;
+    }
+    .gap-card-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+    .gap-num {
+      font-size: 28px; font-weight: 700; color: var(--brand-primary);
+      line-height: 1; flex-shrink: 0; min-width: 32px;
+    }
+    .gap-title { font-size: 16px; font-weight: 600; color: var(--brand-dark); }
+    .gap-detail {
+      font-size: 14px; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .gap-badge {
+      display: inline-flex; align-items: center; font-size: 12px;
+      font-weight: 600; padding: 4px 12px; border-radius: 999px;
+      background: var(--gap-warning-light); color: var(--gap-warning);
+    }
+
+    /* ─── LOADING / ERROR ───────────────────────────────────────── */
+    .loading-state {
+      text-align: center; padding: 96px 24px;
+      color: var(--text-muted); font-size: 16px;
+    }
+    .error-state {
+      text-align: center; padding: 96px 24px;
+      color: var(--gap-warning); font-size: 16px;
+    }
+    .tbd { color: var(--text-muted); font-style: italic; }
+
+    /* ─── RESPONSIVE ────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-links { gap: 16px; }
+      .nav-links a { font-size: 13px; }
+      .hero-title { font-size: 24px; }
+      .hero-quote { font-size: 15px; padding: 16px 18px; }
+      .hm-badges { gap: 8px; }
+      .hm-badge { padding: 6px 14px 6px 10px; font-size: 13px; }
+      .stage-grid { grid-template-columns: 1fr; }
+      .hm-columns { grid-template-columns: 1fr; gap: 24px; }
+      .gaps-grid { grid-template-columns: 1fr; }
+      .hm-card-header { flex-direction: column; align-items: flex-start; }
+      section { padding: 32px 0; }
+      .section-title { font-size: 20px; }
+      .metrics-table { font-size: 13px; }
+      .metrics-table th, .metrics-table td { padding: 8px 8px; }
+    }
+    @media (max-width: 480px) {
+      .nav-inner { height: 48px; }
+      .nav-wordmark { font-size: 16px; }
+      .nav-links { gap: 12px; }
+      .nav-links a { font-size: 12px; }
+      #hero { padding: 40px 0 32px; }
+      .hm-badge { font-size: 12px; padding: 5px 12px 5px 8px; }
+    }
+
+    /* ─── PRINT ─────────────────────────────────────────────────── */
+    @media print {
+      #topnav { display: none; }
+      html { scroll-padding-top: 0; }
+      body { background: #fff; font-size: 12px; }
+      .container, .container--narrow { max-width: 100%; padding: 0 16px; }
+      .stage-card, .hm-card, .gap-card, .accordion-panel { box-shadow: none; break-inside: avoid; }
+      .accordion-body { max-height: none !important; overflow: visible !important; }
+      details[open] summary { margin-bottom: 4px; }
+      details > summary { list-style: none; }
+      details > summary::marker { display: none; }
+      .hm-card.highlight, .hm-card.flash { box-shadow: none; animation: none; }
+      .accordion-panel .accordion-body { max-height: none !important; }
+      section + section { border-top: 1px solid #ddd; }
+      .hero-quote, .hm-promise, .measurement-gaps-box { break-inside: avoid; }
+      .stage-grid, .gaps-grid { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav id="topnav">
+    <div class="nav-inner">
+      <a href="#" class="nav-wordmark">Scandic</a>
+      <ul class="nav-links">
+        <li><a href="#journey" data-section="journey">Journey</a></li>
+        <li><a href="#hero-moments" data-section="hero-moments">Hero Moments</a></li>
+        <li><a href="#scorecard" data-section="scorecard">Scorecard</a></li>
+        <li><a href="#gaps" data-section="gaps">Gaps</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Content root -->
+  <main id="app">
+    <div class="loading-state">Loading framework data…</div>
+  </main>
+
+  <script>
+    /* ─── DATA LOAD ─────────────────────────────────────────────── */
+    fetch('scandic_framework.yaml')
+      .then(r => {
+        if (!r.ok) throw new Error('Could not load scandic_framework.yaml');
+        return r.text();
+      })
+      .then(text => {
+        const data = jsyaml.load(text);
+        renderAll(data);
+        initInteractions();
+      })
+      .catch(err => {
+        document.getElementById('app').innerHTML =
+          '<div class="error-state">Error loading data: ' + err.message + '</div>';
+      });
+
+    /* ─── HELPERS ───────────────────────────────────────────────── */
+    function safe(val) {
+      if (val === null || val === undefined || val === '') return '<span class="tbd">TBD</span>';
+      return escapeHtml(String(val));
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function safeList(arr) {
+      if (!arr || !arr.length) return ['<span class="tbd">TBD</span>'];
+      return arr.map(s => escapeHtml(String(s)));
+    }
+
+    function getStageLabelById(stages, id) {
+      const s = stages.find(st => st.id === id);
+      return s ? s.short_label : 'Stage ' + id;
+    }
+
+    function getHmForStage(heroMoments, stageId) {
+      const primary = heroMoments.filter(hm => hm.primary_stage === stageId);
+      const adjacent = heroMoments.filter(hm => (hm.adjacent_stages || []).includes(stageId));
+      return { primary, adjacent };
+    }
+
+    /* ─── RENDER ALL ────────────────────────────────────────────── */
+    function renderAll(data) {
+      const { meta, stages, hero_moments, scorecards, workshop_gaps } = data;
+      const app = document.getElementById('app');
+
+      app.innerHTML = ''
+        + renderHero(meta, hero_moments)
+        + renderJourney(stages, hero_moments)
+        + renderHeroMoments(hero_moments, stages)
+        + renderScorecard(scorecards, hero_moments, stages)
+        + renderGaps(workshop_gaps);
+    }
+
+    /* ─── HERO HEADER ───────────────────────────────────────────── */
+    function renderHero(meta, heroMoments) {
+      const badges = heroMoments.map(hm =>
+        '<a class="hm-badge" href="#hm-card-' + hm.id + '" data-hm="' + hm.id + '">'
+          + '<span class="hm-badge-icon">' + (hm.icon || '') + '</span>'
+          + '<span class="hm-badge-num">HM' + hm.id + '</span>'
+          + '<span>' + escapeHtml(hm.title) + '</span>'
+        + '</a>'
+      ).join('');
+
+      return '<section id="hero"><div class="container">'
+        + '<h1 class="hero-title">' + safe(meta.title).replace('Scandic Hotels — ', '') + '</h1>'
+        + '<p class="hero-subtitle">' + safe(meta.subtitle) + '</p>'
+        + '<blockquote class="hero-quote">' + safe(meta.where_to_win_theme) + '</blockquote>'
+        + '<div class="hm-badges">' + badges + '</div>'
+        + '</div></section>';
+    }
+
+    /* ─── JOURNEY MAP ───────────────────────────────────────────── */
+    function renderJourney(stages, heroMoments) {
+      // Timeline rail
+      const timelineStages = stages.map(s =>
+        '<div class="timeline-stage">'
+          + '<div class="timeline-circle">' + s.id + '</div>'
+          + '<div class="timeline-label">' + escapeHtml(s.short_label) + '</div>'
+          + '<div class="timeline-customer">"' + escapeHtml(s.customer_language) + '"</div>'
+        + '</div>'
+      ).join('');
+
+      // HM mapping bar
+      const totalStages = stages.length;
+      const barRows = heroMoments.map((hm, idx) => {
+        const allStages = [hm.primary_stage, ...(hm.adjacent_stages || [])].sort((a, b) => a - b);
+        const minS = Math.min(...allStages);
+        const maxS = Math.max(...allStages);
+        // Position as % of total width
+        const leftPct = ((minS - 1) / totalStages * 100 + (100 / totalStages / 2 - 3));
+        const widthPct = ((maxS - minS) / totalStages * 100 + 6);
+        const topPx = idx * 12;
+
+        // Build segments
+        let segments = '';
+        for (let sid = minS; sid <= maxS; sid++) {
+          const segLeft = ((sid - minS) / (maxS - minS + 1)) * 100;
+          const segWidth = (1 / (maxS - minS + 1)) * 100;
+          const cls = sid === hm.primary_stage ? 'hm-bar-primary' : 'hm-bar-adjacent';
+          segments += '<div style="position:absolute;left:' + segLeft + '%;width:' + segWidth + '%;height:100%;border-radius:4px;" class="' + cls + '"></div>';
+        }
+
+        return '<div class="hm-bar-row" style="left:' + leftPct + '%;width:' + widthPct + '%;top:' + topPx + 'px;">'
+          + '<div class="hm-bar-label" style="left:0">HM' + hm.id + '</div>'
+          + segments
+          + '</div>';
+      }).join('');
+
+      // Stage detail cards
+      const stageCards = stages.map(s => {
+        const { primary, adjacent } = getHmForStage(heroMoments, s.id);
+        let badgesHtml = '';
+        if (primary.length || adjacent.length) {
+          const primaryBadges = primary.map(hm => '<span class="stage-hm-tag stage-hm-tag--primary">⭐ HM' + hm.id + '</span>').join('');
+          const adjBadges = adjacent.map(hm => '<span class="stage-hm-tag stage-hm-tag--adjacent">HM' + hm.id + '</span>').join('');
+          badgesHtml = '<div class="stage-hm-badges">' + primaryBadges + adjBadges + '</div>';
+        }
+
+        const hmIds = [...primary.map(h => h.id), ...adjacent.map(h => h.id)];
+        const dataAttr = hmIds.length ? ' data-hm-ids="' + hmIds.join(',') + '"' : '';
+
+        const outcomes = safeList(s.key_outcomes).map(o => '<li>' + o + '</li>').join('');
+
+        return '<div class="stage-card"' + dataAttr + '>'
+          + badgesHtml
+          + '<div class="stage-card-header">'
+            + '<div class="stage-num">' + s.id + '</div>'
+            + '<div>'
+              + '<div class="stage-card-label">' + escapeHtml(s.short_label) + '</div>'
+              + '<div class="stage-card-customer">"' + escapeHtml(s.customer_language) + '"</div>'
+            + '</div>'
+          + '</div>'
+          + '<div class="stage-complete"><strong>Complete when</strong> ' + safe(s.complete_when) + '</div>'
+          + '<div class="stage-success"><span class="stage-success-icon">✓</span><span>' + safe(s.success_statement) + '</span></div>'
+          + '<ul class="stage-outcomes">' + outcomes + '</ul>'
+          + '<div class="stage-evidence">' + safe(s.evidence) + '</div>'
+        + '</div>';
+      }).join('');
+
+      return '<section id="journey"><div class="container">'
+        + '<div class="section-header">'
+          + '<h2 class="section-title">Customer Journey Map</h2>'
+          + '<p class="section-intro">Seven stages from first inspiration to lasting loyalty. Each stage defines what success looks like from the customer\'s perspective.</p>'
+        + '</div>'
+        + '<div class="timeline-wrapper"><div class="timeline-rail"><div class="timeline-connector"></div>' + timelineStages + '</div></div>'
+        + '<div class="timeline-wrapper"><div class="hm-mapping-bar">' + barRows + '</div></div>'
+        + '<div class="stage-grid">' + stageCards + '</div>'
+        + '</div></section>';
+    }
+
+    /* ─── HERO MOMENTS ──────────────────────────────────────────── */
+    function renderHeroMoments(heroMoments, stages) {
+      const criteriaLabels = ['Customer salience', 'Business upside', 'Differentiation', 'Cross-silo unlock', 'Feasibility'];
+
+      const cards = heroMoments.map(hm => {
+        const primaryLabel = getStageLabelById(stages, hm.primary_stage);
+        const adjPills = (hm.adjacent_stages || []).map(sid =>
+          '<span class="hm-stage-pill">' + escapeHtml(getStageLabelById(stages, sid)) + '</span>'
+        ).join('');
+
+        const feasibility = hm.feasibility_note
+          ? '<div class="hm-feasibility-row"><span class="hm-feasibility">⚠ ' + escapeHtml(hm.feasibility_note) + '</span></div>'
+          : '';
+
+        const custVal = safeList(hm.customer_value).map(v => '<li>' + v + '</li>').join('');
+        const bizVal = safeList(hm.business_value).map(v => '<li>' + v + '</li>').join('');
+        const great = safeList(hm.what_great_looks_like).map(v => '<li>' + v + '</li>').join('');
+        const risks = safeList(hm.failure_modes).map(v => '<li>' + v + '</li>').join('');
+        const evidence = safeList(hm.key_evidence).map(v => '<li>' + v + '</li>').join('');
+
+        const criteria = criteriaLabels.map(label =>
+          '<span class="hm-criteria-chip">✓ ' + label + '</span>'
+        ).join('');
+
+        return '<div class="hm-card" id="hm-card-' + hm.id + '">'
+          + '<div class="hm-card-header">'
+            + '<div class="hm-card-header-left">'
+              + '<span class="hm-card-icon">' + (hm.icon || '') + '</span>'
+              + '<span class="hm-card-title">HM' + hm.id + ' — ' + escapeHtml(hm.title) + '</span>'
+            + '</div>'
+            + '<div class="hm-card-header-right">'
+              + '<span class="hm-stage-pill hm-stage-pill--primary">' + escapeHtml(primaryLabel) + '</span>'
+              + adjPills
+            + '</div>'
+          + '</div>'
+          + feasibility
+          + '<blockquote class="hm-promise">' + safe(hm.customer_promise) + '</blockquote>'
+          + '<div class="hm-body">'
+            + '<div class="hm-columns">'
+              + '<div>'
+                + '<div class="hm-col-title">Why It Matters</div>'
+                + '<div class="hm-sub-title">Customer value</div>'
+                + '<ul class="hm-list">' + custVal + '</ul>'
+                + '<div class="hm-sub-title">Business value</div>'
+                + '<ul class="hm-list">' + bizVal + '</ul>'
+              + '</div>'
+              + '<div>'
+                + '<div class="hm-col-title">What Great Looks Like</div>'
+                + '<ol class="hm-numbered">' + great + '</ol>'
+                + '<div class="hm-col-title" style="margin-top:20px">Key Risks</div>'
+                + '<ul class="hm-risk-list">' + risks + '</ul>'
+              + '</div>'
+            + '</div>'
+            + '<details class="hm-evidence">'
+              + '<summary>📎 Supporting evidence</summary>'
+              + '<ul class="hm-evidence-list">' + evidence + '</ul>'
+            + '</details>'
+            + '<div class="hm-criteria">' + criteria + '</div>'
+          + '</div>'
+        + '</div>';
+      }).join('');
+
+      return '<section id="hero-moments"><div class="container--narrow">'
+        + '<div class="section-header">'
+          + '<h2 class="section-title">Where to Win — 5 Hero Moments</h2>'
+          + '<p class="section-intro">These five moments have the highest combined customer salience, business upside, and differentiation potential. Each meets all 5 strategic criteria.</p>'
+        + '</div>'
+        + '<div class="hm-stack">' + cards + '</div>'
+        + '</div></section>';
+    }
+
+    /* ─── SCORECARD ─────────────────────────────────────────────── */
+    function renderScorecard(scorecards, heroMoments, stages) {
+      const panels = scorecards.map(sc => {
+        const hm = heroMoments.find(h => h.id === sc.hero_moment_id);
+        if (!hm) return '';
+
+        const primaryLabel = getStageLabelById(stages, hm.primary_stage);
+        const metricCount = (sc.metrics || []).length;
+        const hasGaps = sc.measurement_gaps !== null && sc.measurement_gaps !== undefined;
+
+        let leadingIdx = 0;
+        const rows = (sc.metrics || []).map(m => {
+          let rowClass = '';
+          const t = (m.type || '').toLowerCase();
+          if (t.includes('lagging')) {
+            rowClass = 'row-lagging';
+          } else if (t.includes('operational')) {
+            rowClass = 'row-operational';
+          } else {
+            leadingIdx++;
+            rowClass = leadingIdx % 2 === 1 ? 'row-leading-odd' : 'row-leading-even';
+          }
+          return '<tr class="' + rowClass + '">'
+            + '<td class="type-cell">' + safe(m.type) + '</td>'
+            + '<td>' + safe(m.metric) + '</td>'
+            + '<td>' + safe(m.source) + '</td>'
+            + '<td>' + safe(m.cadence) + '</td>'
+            + '<td>' + safe(m.owner) + '</td>'
+          + '</tr>';
+        }).join('');
+
+        const gapsBox = hasGaps
+          ? '<div class="measurement-gaps-box"><strong>⚠ Measurement Gaps</strong>' + safe(sc.measurement_gaps) + '</div>'
+          : '';
+
+        const gapBadge = hasGaps
+          ? '<span class="accordion-gap-badge">⚠ gaps</span>'
+          : '';
+
+        return '<div class="accordion-panel">'
+          + '<div class="accordion-header" role="button" tabindex="0">'
+            + '<div class="accordion-header-left">'
+              + '<span class="accordion-header-icon">' + (hm.icon || '') + '</span>'
+              + '<span class="accordion-header-title">' + escapeHtml(hm.title) + '</span>'
+              + '<span class="accordion-header-stage">· ' + escapeHtml(primaryLabel) + '</span>'
+            + '</div>'
+            + '<div class="accordion-header-right">'
+              + '<span class="accordion-metric-count">' + metricCount + ' metrics</span>'
+              + gapBadge
+              + '<svg class="accordion-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>'
+            + '</div>'
+          + '</div>'
+          + '<div class="accordion-body"><div class="accordion-body-inner">'
+            + '<table class="metrics-table">'
+              + '<thead><tr>'
+                + '<th>Metric type</th><th>Metric description</th><th>Data source</th><th>Cadence</th><th>Owner</th>'
+              + '</tr></thead>'
+              + '<tbody>' + rows + '</tbody>'
+            + '</table>'
+            + gapsBox
+          + '</div></div>'
+        + '</div>';
+      }).join('');
+
+      return '<section id="scorecard"><div class="container">'
+        + '<div class="section-header">'
+          + '<h2 class="section-title">Success Scorecard — Metrics per Hero Moment</h2>'
+          + '<p class="section-intro">Leading and lagging indicators per hero moment. Measurement gaps are flagged explicitly.</p>'
+        + '</div>'
+        + '<div class="accordion-stack">' + panels + '</div>'
+        + '</div></section>';
+    }
+
+    /* ─── GAPS ──────────────────────────────────────────────────── */
+    function renderGaps(gaps) {
+      const cards = (gaps || []).map(g =>
+        '<div class="gap-card">'
+          + '<div class="gap-card-header">'
+            + '<div class="gap-num">' + g.id + '</div>'
+            + '<div class="gap-title">' + safe(g.title) + '</div>'
+          + '</div>'
+          + '<div class="gap-detail">' + safe(g.detail) + '</div>'
+          + '<span class="gap-badge">Open</span>'
+        + '</div>'
+      ).join('');
+
+      return '<section id="gaps"><div class="container">'
+        + '<div class="section-header">'
+          + '<h2 class="section-title">Workshop: Open Questions &amp; Gaps</h2>'
+          + '<p class="section-intro">8 questions that must be answered before this framework can be operationalised. Validate these in the workshop.</p>'
+        + '</div>'
+        + '<div class="gaps-grid">' + cards + '</div>'
+        + '</div></section>';
+    }
+
+    /* ─── INTERACTIONS ──────────────────────────────────────────── */
+    function initInteractions() {
+      // Scroll spy
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('.nav-links a');
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            navLinks.forEach(link => {
+              link.classList.toggle('active', link.getAttribute('data-section') === id);
+            });
+          }
+        });
+      }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+
+      sections.forEach(s => observer.observe(s));
+
+      // HM badge click → scroll + flash
+      document.querySelectorAll('.hm-badge').forEach(badge => {
+        badge.addEventListener('click', e => {
+          e.preventDefault();
+          const hmId = badge.getAttribute('data-hm');
+          const card = document.getElementById('hm-card-' + hmId);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.remove('flash');
+            // Force reflow
+            void card.offsetWidth;
+            card.classList.add('flash');
+            setTimeout(() => card.classList.remove('flash'), 1300);
+          }
+        });
+      });
+
+      // Stage card hover → HM card highlight
+      document.querySelectorAll('.stage-card[data-hm-ids]').forEach(card => {
+        const hmIds = card.getAttribute('data-hm-ids').split(',');
+        card.addEventListener('mouseenter', () => {
+          hmIds.forEach(id => {
+            const hmCard = document.getElementById('hm-card-' + id);
+            if (hmCard) hmCard.classList.add('highlight');
+          });
+        });
+        card.addEventListener('mouseleave', () => {
+          hmIds.forEach(id => {
+            const hmCard = document.getElementById('hm-card-' + id);
+            if (hmCard) hmCard.classList.remove('highlight');
+          });
+        });
+      });
+
+      // Accordion expand/collapse
+      document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const panel = header.closest('.accordion-panel');
+          panel.classList.toggle('expanded');
+        });
+        header.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            header.click();
+          }
+        });
+      });
+
+      // Print mode: expand all accordions and details
+      window.addEventListener('beforeprint', () => {
+        document.querySelectorAll('.accordion-panel').forEach(p => p.classList.add('expanded'));
+        document.querySelectorAll('details').forEach(d => d.setAttribute('open', ''));
+      });
+      window.addEventListener('afterprint', () => {
+        document.querySelectorAll('.accordion-panel').forEach(p => p.classList.remove('expanded'));
+        document.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+      });
+    }
+  </script>
+</body>
+</html>
